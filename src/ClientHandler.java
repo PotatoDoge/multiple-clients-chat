@@ -3,7 +3,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.invoke.ConstantBootstraps;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -26,7 +25,6 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
-
     }
 
     @Override
