@@ -8,6 +8,9 @@ public class Client {
     private BufferedWriter bufferedWriter;
     private String username;
 
+    public String key;
+    private boolean keyReceived = false;
+
     public Client(Socket socket, String username){
         try{
             this.socket = socket;
@@ -39,6 +42,7 @@ public class Client {
 
     public void sendMessage(){
         try{
+
             bufferedWriter.write(username);
             bufferedWriter.newLine();
             bufferedWriter.flush();
@@ -47,8 +51,10 @@ public class Client {
             while (socket.isConnected()){
                 String messageToSend = scanner.nextLine();
                 bufferedWriter.write(username + ": " + messageToSend);
+                //bufferedWriter.write("key: " + key);
+                // compresión va aquí
                 bufferedWriter.newLine();
-                bufferedWriter.flush();
+                bufferedWriter.flush(); // sends to buffer
             }
         }
         catch (IOException e){
@@ -65,6 +71,8 @@ public class Client {
 
                 while(socket.isConnected()){
                     try{
+                        // Constantly listens
+                        // aquí se debería desencriptar, descomprimir,imprimir
                         msfFromGroupChat = bufferedReader.readLine();
                         System.out.println(msfFromGroupChat);
                     }
@@ -74,5 +82,13 @@ public class Client {
                 }
             }
         }).start();
+    }
+
+    public void getKeyFromServer() throws IOException {
+        if(!keyReceived){
+            DataInputStream dis = new DataInputStream(socket.getInputStream());
+            key = dis.readUTF();
+            keyReceived = true;
+        }
     }
 }
