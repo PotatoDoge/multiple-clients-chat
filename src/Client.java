@@ -50,9 +50,8 @@ public class Client {
             Scanner scanner = new Scanner(System.in);
             while (socket.isConnected()){
                 String messageToSend = scanner.nextLine();
+                // encriptar y compresión va aquí
                 bufferedWriter.write(username + ": " + messageToSend);
-                //bufferedWriter.write("key: " + key);
-                // compresión va aquí
                 bufferedWriter.newLine();
                 bufferedWriter.flush(); // sends to buffer
             }
