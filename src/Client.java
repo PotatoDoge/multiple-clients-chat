@@ -74,6 +74,7 @@ public class Client {
                         // Constantly listens
                         // aquí se debería desencriptar, descomprimir,imprimir
                         msfFromGroupChat = bufferedReader.readLine();
+                        msfFromGroupChat = Encryption.decrypt(msfFromGroupChat,key);
                         System.out.println(msfFromGroupChat);
                     }
                     catch (IOException e){
