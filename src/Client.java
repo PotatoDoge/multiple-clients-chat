@@ -51,7 +51,8 @@ public class Client {
             while (socket.isConnected()){
                 String messageToSend = scanner.nextLine();
                 // encriptar y compresión va aquí
-                bufferedWriter.write(username + ": " + messageToSend);
+                String encrypted = "username: " + Encryption.encrypt(messageToSend,key);
+                bufferedWriter.write(encrypted);
                 bufferedWriter.newLine();
                 bufferedWriter.flush(); // sends to buffer
             }
