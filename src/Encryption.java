@@ -2,13 +2,6 @@ import java.util.*;
 
 public class Encryption {
 
-    private static final Character []a = { 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-            'h', 'i', 'j', 'k', 'l', 'm', 'n',
-            'o', 'p', 'q', 'r', 's', 't', 'u',
-            'v', 'w', 'x', 'y', 'z' };
-
-    private static final List<Character> alphabet =  Arrays.asList(a);
-
     public Encryption(){}
 
     public static String encrypt(String input, String key){
