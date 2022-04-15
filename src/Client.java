@@ -52,6 +52,7 @@ public class Client {
                 String messageToSend = scanner.nextLine();
                 // encriptar y compresión va aquí
                 String encrypted = Encryption.encrypt(username + ": " + messageToSend,key);
+                encrypted = Compression.encodeString(encrypted);
                 bufferedWriter.write(encrypted);
                 bufferedWriter.newLine();
                 bufferedWriter.flush(); // sends to buffer
@@ -74,6 +75,7 @@ public class Client {
                         // Constantly listens
                         // aquí se debería desencriptar, descomprimir,imprimir
                         msfFromGroupChat = bufferedReader.readLine();
+                        msfFromGroupChat = Compression.decodeString(msfFromGroupChat);
                         msfFromGroupChat = Encryption.decrypt(msfFromGroupChat,key);
                         System.out.println(msfFromGroupChat);
                     }

@@ -11,10 +11,10 @@ public class Encryption {
         int s = 1;
         for (int i = 0; i < input.length(); i++) {
             newValue = ((long) input.charAt(i) + ((long) key.charAt(i % key.length()) - 32) * s);
-            if (newValue > 65534) {
-                newValue = 32 + (newValue - 65535);
+            if (newValue > 254) {
+                newValue = 32 + (newValue - 255);
             } else if (newValue < 32) {
-                newValue = 65535 - (32 - newValue);
+                newValue = 255 - (32 - newValue);
             }
             cyphered.append((char) newValue);
             s = s * -1;
@@ -28,10 +28,10 @@ public class Encryption {
         int s = -1;
         for (int i = 0; i < input.length(); i++) {
             newValue = ((long) input.charAt(i) + ((long) key.charAt(i % key.length()) - 32) * s);
-            if (newValue > 65534) {
-                newValue = 32 + (newValue - 65535);
+            if (newValue > 254) {
+                newValue = 32 + (newValue - 255);
             } else if (newValue < 32) {
-                newValue = 65535 - (32 - newValue);
+                newValue = 255 - (32 - newValue);
             }
             cyphered.append((char) newValue);
             s = s * -1;
@@ -44,7 +44,7 @@ public class Encryption {
         Random r = new Random();
         int ranLength = r.nextInt((3)) + 6; // [6,9]
         for (int i = 0; i < ranLength; i++) {
-            long ranChar = r.nextInt(30000) + 33; // [33,65502]
+            long ranChar = r.nextInt(222) + 33; // [33,65502]
             // k.append(alphabet.get((int) (Math.random() * 100 % 26)));
             k.append((char) ranChar);
         }

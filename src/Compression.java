@@ -3,10 +3,7 @@ import java.util.ArrayList;
 public class Compression {
 
     public static void main(String[] args) {
-        String encode = encodeString("The quick brown fox jumps over the lazy dog.");
-        System.out.println(encode);
-        String decode = decodeString(encode);
-        System.out.println(decode);
+        
 
     }
 
