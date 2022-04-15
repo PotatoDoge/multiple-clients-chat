@@ -3,7 +3,6 @@ import java.util.ArrayList;
 public class Compression {
 
     public static void main(String[] args) {
-        
 
     }
 
@@ -120,6 +119,7 @@ public class Compression {
             input /= b;
             sb.append(val);
         }
-        return sb.reverse().toString();
+        String out =sb.reverse().toString(); 
+        return out.isEmpty() ? "0" : out;
     }
 }
