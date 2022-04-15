@@ -13,13 +13,12 @@ public class Server {
 
     public void startServer(){
         try{
-            System.out.println("Key: " + key);
             while(!serverSocket.isClosed()){
                 Socket socket = serverSocket.accept();
                 System.out.println("A new client has connected!");
                 DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
                 dos.writeUTF(key); // sends key to clients
-                ClientHandler clientHandler = new ClientHandler(socket);
+                ClientHandler clientHandler = new ClientHandler(socket,key);
                 Thread thread = new Thread(clientHandler);
                 thread.start();
             }

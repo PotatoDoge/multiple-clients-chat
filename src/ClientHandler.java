@@ -13,15 +13,20 @@ public class ClientHandler implements Runnable {
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private String clientUsername;
+    private String key;
 
-    public ClientHandler(Socket socket) {
+    public ClientHandler(Socket socket, String key) {
         try {
             this.socket = socket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.clientUsername = bufferedReader.readLine();
+            this.key = key;
             clientHandlers.add(this);
-            //broadcastMessage("SERVER: " + clientUsername + " has entered the chat!");
+            String msg = "SERVER: " + clientUsername + " has entered the chat!";
+            msg = Encryption.encrypt(msg,key);
+            msg = Compression.encodeString(msg);
+            broadcastMessage(msg);
         } catch (IOException e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
@@ -58,7 +63,10 @@ public class ClientHandler implements Runnable {
 
     public void removeClientHandler() {
         clientHandlers.remove(this);
-        broadcastMessage("SERVER: " + clientUsername + " has left the chat!");
+        String msg = "SERVER: " + clientUsername + " has left the chat!";
+        msg = Encryption.encrypt(msg,key);
+        msg = Compression.encodeString(msg);
+        broadcastMessage(msg);
     }
 
     public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
