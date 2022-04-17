@@ -10,7 +10,6 @@ public class MainClient {
         Socket socket = new Socket("localhost",1234);
         Client client = new Client(socket,username);
         client.getKeyFromServer();
-        System.out.println(client.key);
         client.listenForMessage();
         client.sendMessage();
     }
