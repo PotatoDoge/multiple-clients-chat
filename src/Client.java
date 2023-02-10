@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Client {
@@ -7,8 +8,10 @@ public class Client {
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private String username;
+    private ArrayList<Integer> numbers = new ArrayList<>();
 
     public String key;
+
     private boolean keyReceived = false;
 
     public Client(Socket socket, String username){
@@ -68,7 +71,7 @@ public class Client {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String msfFromGroupChat;
+                String msfFromGroupChat = "";
 
                 while(socket.isConnected()){
                     try{
@@ -77,10 +80,15 @@ public class Client {
                         msfFromGroupChat = bufferedReader.readLine();
                         msfFromGroupChat = Compression.decodeString(msfFromGroupChat);
                         msfFromGroupChat = Encryption.decrypt(msfFromGroupChat,key);
-                        System.out.println(msfFromGroupChat);
+                        int n = Integer.parseInt(msfFromGroupChat);
+                        numbers.add(n);
+                        System.out.println(numbers);
                     }
                     catch (IOException e){
                         closeEverything(socket,bufferedReader,bufferedWriter);
+                    }
+                    catch (NumberFormatException e){
+                        System.out.println(msfFromGroupChat);
                     }
                 }
             }

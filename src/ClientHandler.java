@@ -1,9 +1,8 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.Timer;
 
 public class ClientHandler implements Runnable {
 
@@ -13,6 +12,7 @@ public class ClientHandler implements Runnable {
     private BufferedWriter bufferedWriter;
     private String clientUsername;
     private String key;
+    private static int clients = 0;
 
     public ClientHandler(Socket socket, String key) {
         try {
@@ -68,6 +68,16 @@ public class ClientHandler implements Runnable {
         broadcastMessage(msg);
     }
 
+    public void refuseHandler() throws IOException {
+        String encrypted = Encryption.encrypt("refused connection",key);
+        encrypted = Compression.encodeString(encrypted);
+        this.bufferedWriter.write(encrypted);
+        this.bufferedWriter.newLine();
+        this.bufferedWriter.flush();
+        closeEverything(this.socket, this.bufferedReader, this.bufferedWriter);
+        clients--;
+    }
+
     public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
         removeClientHandler();
         try {
@@ -86,4 +96,39 @@ public class ClientHandler implements Runnable {
 
     }
 
+    public void connectedClient(){
+        clients++;
+    }
+
+    public int getNumberOfClients(){
+        return clients;
+    }
+
+    public static void sendNumbers(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Random r = new Random();
+                int ranNum = r.nextInt((8)) + 11; // [11,19]
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                for (ClientHandler clientHandler : clientHandlers) {
+                    try {
+                            String encrypted = Encryption.encrypt(String.valueOf(ranNum),  Server.key);
+                            encrypted = Compression.encodeString(encrypted);
+                            clientHandler.bufferedWriter.write(encrypted);
+                            clientHandler.bufferedWriter.newLine();
+                            clientHandler.bufferedWriter.flush();
+
+                    }
+                    catch (Exception e){
+                        System.out.println(e);
+                    }
+                }
+            }
+        }).start();
+    }
 }
