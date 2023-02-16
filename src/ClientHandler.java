@@ -18,6 +18,7 @@ public class ClientHandler implements Runnable {
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.clientUsername = bufferedReader.readLine();
+            System.out.println("Recevied username: " + clientUsername);
             clientHandlers.add(this);
             String msg = "SERVER: " + clientUsername + " has entered the chat!";
             msg = Encryption.encrypt(msg,Server.key);

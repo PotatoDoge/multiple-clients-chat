@@ -18,7 +18,6 @@ public class Client {
         String username = scanner.nextLine();
         Socket socket = new Socket("localhost",5600);
         Client client = new Client(socket,username);
-        System.out.println("Keys is " + client.key);
         client.listenForMessage();
         client.sendMessage();
     }
@@ -32,6 +31,8 @@ public class Client {
             DataInputStream dis = new DataInputStream(socket.getInputStream());
             key = dis.readUTF();
             bufferedWriter.write(username);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
         }
         catch (IOException e){
             closeEverything(socket, bufferedReader, bufferedWriter);
