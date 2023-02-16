@@ -2,9 +2,6 @@ import java.util.*;
 
 public class Encryption {
 
-    public Encryption() {
-    }
-
     public static String encrypt(String input, String key) {
         StringBuilder cyphered = new StringBuilder();
         long newValue;

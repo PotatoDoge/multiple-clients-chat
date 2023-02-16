@@ -8,11 +8,20 @@ public class Client {
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private String username;
-    private ArrayList<Integer> numbers = new ArrayList<>();
+    private final ArrayList<Integer> numbers = new ArrayList<>();
 
     public String key;
 
-    private boolean keyReceived = false;
+    public static void main(String[] args) throws IOException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the username for the group chat: ");
+        String username = scanner.nextLine();
+        Socket socket = new Socket("localhost",5600);
+        Client client = new Client(socket,username);
+        System.out.println("Keys is " + client.key);
+        client.listenForMessage();
+        client.sendMessage();
+    }
 
     public Client(Socket socket, String username){
         try{
@@ -20,10 +29,58 @@ public class Client {
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.username = username;
+            DataInputStream dis = new DataInputStream(socket.getInputStream());
+            key = dis.readUTF();
         }
         catch (IOException e){
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
+    }
+
+    public void sendMessage(){
+        new Thread(() -> {
+            try{
+                Scanner scanner = new Scanner(System.in);
+                while (socket.isConnected()){
+                    String messageToSend = scanner.nextLine();
+                    // encriptar y compresión va aquí
+                    String encrypted = Encryption.encrypt(username + ": " + messageToSend,key);
+                    encrypted = Compression.encodeString(encrypted);
+                    bufferedWriter.write(encrypted);
+                    bufferedWriter.newLine();
+                    bufferedWriter.flush(); // sends to buffer
+                }
+            }
+            catch (IOException e){
+                closeEverything(socket, bufferedReader, bufferedWriter);
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    public void listenForMessage(){
+        new Thread(() -> {
+            String msfFromGroupChat = "";
+
+            while(socket.isConnected()){
+                try{
+                    // Constantly listens
+                    // aquí se debería desencriptar, descomprimir,imprimir
+                    msfFromGroupChat = bufferedReader.readLine();
+                    msfFromGroupChat = Compression.decodeString(msfFromGroupChat);
+                    msfFromGroupChat = Encryption.decrypt(msfFromGroupChat,key);
+                    int n = Integer.parseInt(msfFromGroupChat);
+                    numbers.add(n);
+                    System.out.println(numbers);
+                }
+                catch (IOException e){
+                    closeEverything(socket,bufferedReader,bufferedWriter);
+                }
+                catch (NumberFormatException e){
+                    System.out.println(msfFromGroupChat);
+                }
+            }
+        }).start();
     }
 
     private void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
@@ -40,66 +97,6 @@ public class Client {
         }
         catch (IOException e){
             e.printStackTrace();
-        }
-    }
-
-    public void sendMessage(){
-        try{
-
-            bufferedWriter.write(username);
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
-
-            Scanner scanner = new Scanner(System.in);
-            while (socket.isConnected()){
-                String messageToSend = scanner.nextLine();
-                // encriptar y compresión va aquí
-                String encrypted = Encryption.encrypt(username + ": " + messageToSend,key);
-                encrypted = Compression.encodeString(encrypted);
-                bufferedWriter.write(encrypted);
-                bufferedWriter.newLine();
-                bufferedWriter.flush(); // sends to buffer
-            }
-        }
-        catch (IOException e){
-            closeEverything(socket, bufferedReader, bufferedWriter);
-            e.printStackTrace();
-        }
-    }
-
-    public void listenForMessage(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String msfFromGroupChat = "";
-
-                while(socket.isConnected()){
-                    try{
-                        // Constantly listens
-                        // aquí se debería desencriptar, descomprimir,imprimir
-                        msfFromGroupChat = bufferedReader.readLine();
-                        msfFromGroupChat = Compression.decodeString(msfFromGroupChat);
-                        msfFromGroupChat = Encryption.decrypt(msfFromGroupChat,key);
-                        int n = Integer.parseInt(msfFromGroupChat);
-                        numbers.add(n);
-                        System.out.println(numbers);
-                    }
-                    catch (IOException e){
-                        closeEverything(socket,bufferedReader,bufferedWriter);
-                    }
-                    catch (NumberFormatException e){
-                        System.out.println(msfFromGroupChat);
-                    }
-                }
-            }
-        }).start();
-    }
-
-    public void getKeyFromServer() throws IOException {
-        if(!keyReceived){
-            DataInputStream dis = new DataInputStream(socket.getInputStream());
-            key = dis.readUTF();
-            keyReceived = true;
         }
     }
 }
