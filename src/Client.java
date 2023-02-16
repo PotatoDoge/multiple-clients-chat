@@ -31,6 +31,7 @@ public class Client {
             this.username = username;
             DataInputStream dis = new DataInputStream(socket.getInputStream());
             key = dis.readUTF();
+            bufferedWriter.write(username);
         }
         catch (IOException e){
             closeEverything(socket, bufferedReader, bufferedWriter);
