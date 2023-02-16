@@ -11,6 +11,18 @@ public class ClientHandler implements Runnable {
     private BufferedWriter bufferedWriter;
     private String clientUsername;
     private static int clients = 0;
+    private static final Thread numbers = new Thread(() -> {
+        Random r = new Random();
+        while (true){
+            int ranNum = r.nextInt((8)) + 11; // [11,19]
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Server.announce(String.valueOf(ranNum));
+        }
+    });
 
     public ClientHandler(Socket socket) {
         try {
@@ -32,7 +44,6 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         String messageFromClient;
-
         while (socket.isConnected()) {
             try {
                 messageFromClient = bufferedReader.readLine();
@@ -86,6 +97,10 @@ public class ClientHandler implements Runnable {
     public void closeEverything() {
         clientHandlers.remove(this);
         broadcastMessage("SERVER: " + clientUsername + " has left the chat!");
+        if (clients == 1) {
+            stopNumbers();
+            broadcastMessage("Not enough players, game stopping, winner is: " + clientHandlers.get(0));
+        }
         try {
             if (bufferedReader != null) {
                 bufferedReader.close();
@@ -111,15 +126,14 @@ public class ClientHandler implements Runnable {
     }
 
     public static void sendNumbers(){
-        new Thread(() -> {
-            Random r = new Random();
-            int ranNum = r.nextInt((8)) + 11; // [11,19]
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            broadcastMessage(String.valueOf(ranNum));
-        }).start();
+        numbers.start();
+    }
+
+    public static void stopNumbers(){
+        try {
+            numbers.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

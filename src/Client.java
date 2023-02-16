@@ -9,7 +9,6 @@ public class Client {
     private BufferedWriter bufferedWriter;
     private String username;
     private final ArrayList<Integer> numbers = new ArrayList<>();
-
     public String key;
 
     public static void main(String[] args) throws IOException {
@@ -35,7 +34,7 @@ public class Client {
             bufferedWriter.flush();
         }
         catch (IOException e){
-            closeEverything(socket, bufferedReader, bufferedWriter);
+            closeEverything();
         }
     }
 
@@ -45,7 +44,7 @@ public class Client {
                 Scanner scanner = new Scanner(System.in);
                 while (socket.isConnected()){
                     String messageToSend = scanner.nextLine();
-                    // encriptar y compresión va aquí
+                    //encriptar y compresión va aquí
                     String encrypted = Encryption.encrypt(username + ": " + messageToSend,key);
                     encrypted = Compression.encodeString(encrypted);
                     bufferedWriter.write(encrypted);
@@ -54,7 +53,7 @@ public class Client {
                 }
             }
             catch (IOException e){
-                closeEverything(socket, bufferedReader, bufferedWriter);
+                closeEverything();
                 e.printStackTrace();
             }
         }).start();
@@ -66,8 +65,6 @@ public class Client {
 
             while(socket.isConnected()){
                 try{
-                    // Constantly listens
-                    // aquí se debería desencriptar, descomprimir,imprimir
                     msfFromGroupChat = bufferedReader.readLine();
                     msfFromGroupChat = Compression.decodeString(msfFromGroupChat);
                     msfFromGroupChat = Encryption.decrypt(msfFromGroupChat,key);
@@ -76,7 +73,7 @@ public class Client {
                     System.out.println(numbers);
                 }
                 catch (IOException e){
-                    closeEverything(socket,bufferedReader,bufferedWriter);
+                    closeEverything();
                 }
                 catch (NumberFormatException e){
                     System.out.println(msfFromGroupChat);
@@ -85,7 +82,7 @@ public class Client {
         }).start();
     }
 
-    private void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
+    private void closeEverything() {
         try{
             if(bufferedReader != null){
                 bufferedReader.close();
