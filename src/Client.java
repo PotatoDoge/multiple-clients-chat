@@ -7,7 +7,6 @@ public class Client {
     private Socket socket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
-    private String username;
     private final ArrayList<Integer> numbers = new ArrayList<>();
     public String key;
 
@@ -18,7 +17,6 @@ public class Client {
         Socket socket = new Socket("localhost",5600);
         Client client = new Client(socket,username);
         client.listenForMessage();
-        client.sendMessage();
     }
 
     public Client(Socket socket, String username){
@@ -26,7 +24,6 @@ public class Client {
             this.socket = socket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.username = username;
             DataInputStream dis = new DataInputStream(socket.getInputStream());
             key = dis.readUTF();
             bufferedWriter.write(username);
@@ -38,45 +35,87 @@ public class Client {
         }
     }
 
-    public void sendMessage(){
-        new Thread(() -> {
-            try{
-                Scanner scanner = new Scanner(System.in);
-                while (socket.isConnected()){
-                    String messageToSend = scanner.nextLine();
-                    //encriptar y compresión va aquí
-                    String encrypted = Encryption.encrypt(username + ": " + messageToSend,key);
-                    encrypted = Compression.encodeString(encrypted);
-                    bufferedWriter.write(encrypted);
+    private final Thread sendMessage = new Thread(() -> {
+        try{
+            int res = numbers.get(0);
+            Scanner scanner = new Scanner(System.in);
+            while (socket.isConnected()){
+
+                System.out.println("Números");
+                System.out.println(numbers);
+
+                System.out.println("Selecciona el índice del número");
+                int target = numbers.get(scanner.nextInt());
+                scanner.nextLine();
+
+                System.out.println("Opciones:\n1: Suma\n2: Resta\n 3: Multiplicación\n 4: División");
+                int op = scanner.nextInt();
+                scanner.nextLine();
+
+                switch (op){
+                    case 1:
+                        res += target;
+                    case 2:
+                        res -= target;
+                    case 3:
+                        res *= target;
+                    case 4:
+                        res /= target;
+                }
+
+                System.out.println("Resultado: " + res);
+
+                if (res == 100){
+                    System.out.println("Ganaste!");
+                    String msg = Encryption.encrypt("win",key);
+                    msg = Compression.encodeString(msg);
+                    bufferedWriter.write(msg);
                     bufferedWriter.newLine();
                     bufferedWriter.flush(); // sends to buffer
                 }
             }
-            catch (IOException e){
-                closeEverything();
-                e.printStackTrace();
-            }
-        }).start();
-    }
+        }
+        catch (IOException e){
+            closeEverything();
+            e.printStackTrace();
+        }
+    });
+
 
     public void listenForMessage(){
         new Thread(() -> {
-            String msfFromGroupChat = "";
+            String msg = "";
 
             while(socket.isConnected()){
                 try{
-                    msfFromGroupChat = bufferedReader.readLine();
-                    msfFromGroupChat = Compression.decodeString(msfFromGroupChat);
-                    msfFromGroupChat = Encryption.decrypt(msfFromGroupChat,key);
-                    int n = Integer.parseInt(msfFromGroupChat);
+                    msg = bufferedReader.readLine();
+                    msg = Compression.decodeString(msg);
+                    msg = Encryption.decrypt(msg,key);
+                    int n = Integer.parseInt(msg);
                     numbers.add(n);
+                    System.out.println("Nuevo número: " + n);
                     System.out.println(numbers);
+
+                    if (numbers.size() > 25){
+                        System.out.println("Perdiste :(");
+                        msg = Encryption.encrypt("loose",key);
+                        msg = Compression.encodeString(msg);
+                        bufferedWriter.write(msg);
+                        bufferedWriter.newLine();
+                        bufferedWriter.flush(); // sends to buffer
+                        closeEverything();
+                    }
                 }
                 catch (IOException e){
                     closeEverything();
                 }
                 catch (NumberFormatException e){
-                    System.out.println(msfFromGroupChat);
+                    if (msg.equals("Start")){
+                        System.out.println("El juego ha comenzado.");
+                        sendMessage.start();
+                    } else {
+                    System.out.println("Perdiste, el ganador es: " + msg);
+                    }
                 }
             }
         }).start();

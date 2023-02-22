@@ -34,7 +34,7 @@ public class Server {
                 thread.start();
                 if(!gameStarted && clientHandler.getNumberOfClients() > minPlayers) {
                     gameStarted = true;
-                    announce("Game starting");
+                    announce("Start");
                     ClientHandler.sendNumbers();
                 } else if(gameStarted){
                     clientHandler.refuseHandler();

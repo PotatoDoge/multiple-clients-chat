@@ -43,11 +43,12 @@ public class ClientHandler implements Runnable {
 
     @Override
     public void run() {
-        String messageFromClient;
+        String msg;
         while (socket.isConnected()) {
             try {
-                messageFromClient = bufferedReader.readLine();
-                sendMessage(messageFromClient);
+                msg = bufferedReader.readLine();
+                msg = Compression.decodeString(Encryption.decrypt(msg, Server.key));
+                sendMessage(msg);
             } catch (Exception e) {
                 closeEverything();
                 break;
